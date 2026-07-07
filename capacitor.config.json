@@ -1,0 +1,16 @@
+{
+  "appId": "tr.org.turkomurga.kongre2027",
+  "appName": "Türk Omurga Kongresi",
+  "webDir": "public",
+  "server": {
+    "url": "https://omurga-kongresi-2027-production.up.railway.app",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

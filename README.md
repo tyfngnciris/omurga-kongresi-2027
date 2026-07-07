@@ -101,6 +101,101 @@ kayıt oluşturabilir. Ücretler `lib/registration-constants.js` üzerinden
 paneli (`/admin/kayitlar`) üzerinden tüm kayıtlar görüntülenebilir. Ödeme entegrasyonu
 eklendiğinde `RegistrationStatus` enum'undaki `ODEME_ONAYLANDI` durumu kullanılabilir.
 
+## PWA (Progressive Web App)
+
+Site artık bir PWA: `public/manifest.json`, ikon seti (`public/icons/`), `public/sw.js`
+(minimal service worker — sadece statik dosyaları önbelleğe alır, HTML/API
+yanıtlarını önbelleğe almaz çünkü fiyatlar ve son tarihler dinamik) ve
+`components/PWARegister.jsx` (service worker kaydı) eklendi. Kullanıcılar
+mobil tarayıcıda "Ana Ekrana Ekle" ile siteyi bir uygulama gibi
+yükleyebilir — mağaza başvurusu gerekmez.
+
+## Mobil Uygulama (iOS & Android Mağazaları)
+
+Site, [Capacitor](https://capacitorjs.com) ile native bir kabuğa sarılacak şekilde
+yapılandırıldı (`capacitor.config.json`). Bu kabuk, canlı siteyi (`server.url`)
+doğrudan yükler — ayrı bir mobil kod tabanı yönetmenize gerek yok, içerik
+güncellemeleri otomatik olarak mobil uygulamaya da yansır.
+
+**Önemli:** iOS derlemesi Xcode gerektirdiğinden ve Xcode yalnızca macOS'te
+çalıştığından, bu adımların native proje oluşturma/derleme/imzalama kısmı
+kendi Mac'inizde yapılmalıdır (aşağıdaki komutlar `kongre-sitesi 3` klasöründe
+çalıştırılır).
+
+### Gereksinimler
+
+- **iOS:** Xcode (Mac App Store, ücretsiz) + Apple Developer Program üyeliği
+  (yıllık $99)
+- **Android:** [Android Studio](https://developer.android.com/studio) (ücretsiz)
+  + Google Play Console hesabı (tek seferlik $25)
+- Node.js (zaten kurulu)
+
+### 1. Native projeleri oluştur
+
+```bash
+npm install
+npx cap add ios
+npx cap add android
+```
+
+Bu komutlar projede `ios/` ve `android/` klasörleri oluşturur (Xcode/Android
+Studio projeleri).
+
+### 2. İkon ve splash ekranlarını otomatik üret
+
+`resources/icon.png` (1024×1024), `resources/icon-foreground.png`,
+`resources/icon-background.png` (Android adaptive icon) ve `resources/splash.png`
+zaten hazır (kongre logosundan — lacivert/turkuaz "TO" amblemi). Tüm platform
+boyutlarını tek komutla üretin:
+
+```bash
+npx capacitor-assets generate
+npx cap sync
+```
+
+### 3. iOS — Xcode ile derleme ve App Store'a gönderim
+
+```bash
+npx cap open ios
+```
+
+Xcode açıldığında:
+1. Sol panelden proje adına tıklayıp **Signing & Capabilities** sekmesinde
+   Apple Developer hesabınızı (Team) seçin.
+2. Bundle Identifier'ın `tr.org.turkomurga.kongre2027` olduğunu doğrulayın
+   (App Store Connect'te önce bu ID ile bir uygulama kaydı oluşturmanız gerekir).
+3. **Product → Archive** ile arşiv alın, ardından **Distribute App → App Store
+   Connect** ile yükleyin.
+4. App Store Connect'te (appstoreconnect.apple.com) ekran görüntüleri, açıklama
+   ve inceleme bilgilerini doldurup incelemeye gönderin.
+
+Apple'ın **Guideline 4.2 (Minimum Functionality)** kuralı nedeniyle sade bir
+web sarmalayıcı reddedilebilir; onay ihtimalini artırmak için en az bir native
+özellik eklemeniz önerilir (ör. push bildirim, paylaşım butonu) — bkz.
+"Sonraki Aşamalar".
+
+### 4. Android — Android Studio ile derleme ve Play Store'a gönderim
+
+```bash
+npx cap open android
+```
+
+Android Studio açıldığında:
+1. **Build → Generate Signed Bundle / APK** seçin, **Android App Bundle**'ı
+   işaretleyin.
+2. İlk seferde yeni bir keystore oluşturun (bu dosyayı ve şifresini güvenli bir
+   yerde saklayın — kaybederseniz uygulamayı güncelleyemezsiniz).
+3. Oluşan `.aab` dosyasını [Google Play Console](https://play.google.com/console)
+   üzerinden yeni bir uygulama olarak yükleyin, mağaza bilgilerini doldurup
+   incelemeye gönderin.
+
+### İçerik güncellemeleri
+
+`server.url` sabit olarak canlı siteyi gösterdiği için, sitede yaptığınız her
+güncelleme (Railway'e deploy sonrası) hem web hem mobil uygulamada anında
+görünür — mağazalara tekrar yükleme yapmanıza gerek yoktur. Yeniden derleme
+yalnızca ikon/isim/native özellik değişikliklerinde gerekir.
+
 ## Sonraki Aşamalar
 
 - Online ödeme (kredi kartı, e-fatura) entegrasyonu — kayıt formu ve veritabanı hazır
@@ -110,3 +205,8 @@ eklendiğinde `RegistrationStatus` enum'undaki `ODEME_ONAYLANDI` durumu kullanı
 - Gerçek logo, fotoğraf ve program içeriğinin eklenmesi
 - Çok dilli yapı (TR/EN) için i18n altyapısının devreye alınması
 - Formel Prisma migration sürecine geçiş (şu an `db push` kullanılıyor)
+- iOS App Store onay ihtimalini artırmak için native özellik eklenmesi (push
+  bildirim, paylaşım, vb.) — `@capacitor/push-notifications`,
+  `@capacitor/share` gibi Capacitor eklentileriyle mümkün
+- Gerçek kongre logosu geldiğinde `resources/` altındaki ikon/splash
+  kaynaklarının ve `public/icons/` klasörünün güncellenmesi
