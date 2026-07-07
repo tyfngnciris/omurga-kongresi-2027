@@ -34,6 +34,24 @@ enum ReviewDecision {
   RED
 }
 
+enum RegistrationCategory {
+  UYE
+  UYE_DEGIL
+  FIRMA
+}
+
+enum AccommodationType {
+  YOK
+  SINGLE
+  DOUBLE
+}
+
+enum RegistrationStatus {
+  KAYIT_ALINDI
+  ODEME_ONAYLANDI
+  IPTAL
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -83,4 +101,21 @@ model Review {
   createdAt    DateTime        @default(now())
 
   @@unique([abstractId, reviewerId])
+}
+
+model Registration {
+  id               String                @id @default(cuid())
+  trackingCode     String                @unique
+  fullName         String
+  email            String
+  phone            String
+  institution      String?
+  category         RegistrationCategory
+  accommodation    AccommodationType     @default(YOK)
+  invoiceTitle     String?
+  taxOffice        String?
+  taxNumber        String?
+  invoiceAddress   String?
+  status           RegistrationStatus    @default(KAYIT_ALINDI)
+  createdAt        DateTime              @default(now())
 }

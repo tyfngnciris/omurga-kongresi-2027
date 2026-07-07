@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logoutUser } from "@/lib/actions/auth-actions";
 
 const ROLE_LABELS = {
@@ -7,7 +8,14 @@ const ROLE_LABELS = {
   ADMIN: "Yönetici",
 };
 
+const ADMIN_NAV = [
+  { href: "/admin/bildiriler", label: "Bildiriler" },
+  { href: "/admin/kayitlar", label: "Kayıtlar" },
+];
+
 export default function DashboardShell({ session, title, subtitle, children }) {
+  const showAdminNav = session.role === "ADMIN" || session.role === "COMMITTEE";
+
   return (
     <section className="mx-auto max-w-content px-5 py-10">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-navy-100 pb-6">
@@ -17,6 +25,19 @@ export default function DashboardShell({ session, title, subtitle, children }) {
           {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-4">
+          {showAdminNav && (
+            <nav className="flex gap-2">
+              {ADMIN_NAV.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md border border-navy-100 px-3 py-2 text-xs font-medium text-navy-700 transition hover:bg-navy-50"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          )}
           <div className="text-right">
             <p className="text-sm font-medium text-navy-700">{session.name}</p>
             <p className="text-xs text-gray-500">{session.email}</p>

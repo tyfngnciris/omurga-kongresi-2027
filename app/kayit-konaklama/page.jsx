@@ -1,3 +1,4 @@
+import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import { registrationFees, accommodationFees } from "@/lib/site-data";
 
@@ -29,13 +30,17 @@ export default function KayitKonaklamaPage() {
       <section className="mx-auto max-w-content px-5 py-16">
         <div className="card mb-12 flex flex-col items-center gap-4 border-teal-100 bg-teal-50/40 text-center">
           <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-medium text-teal-700">
-            Online kayıt sistemi yakında aktif olacaktır
+            Online kayıt formu aktif
           </span>
           <p className="max-w-xl text-sm text-gray-600">
-            Kredi kartı ile online ödeme ve otomatik fatura oluşturma özellikli kayıt
-            sistemi bir sonraki geliştirme aşamasında bu sayfaya eklenecektir. Aşağıda
-            güncel kayıt ve konaklama ücretlerini inceleyebilirsiniz.
+            Aşağıdaki güncel ücretleri inceledikten sonra kayıt formunu doldurarak
+            kongre kaydınızı oluşturabilirsiniz. Kredi kartı ile online ödeme özelliği
+            bir sonraki aşamada eklenecektir; kayıt sonrası ödeme adımları için
+            kongre sekretaryası sizinle iletişime geçecektir.
           </p>
+          <Link href="/kayit-konaklama/basvuru" className="btn-primary">
+            Kayıt Formunu Doldur →
+          </Link>
         </div>
 
         <p className="section-label mb-2">Kayıt Ücretleri</p>

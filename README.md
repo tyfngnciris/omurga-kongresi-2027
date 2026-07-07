@@ -2,7 +2,8 @@
 
 Next.js (App Router) + Tailwind CSS + PostgreSQL (Prisma) ile geliştirilmiş kongre web
 sitesi. Genel bilgilendirme sayfalarının yanı sıra hakem değerlendirmeli bildiri gönderim
-sistemi de bu sürümde aktif. Online kayıt/ödeme sistemi sonraki aşamada eklenecektir.
+sistemi ve kayıt formu (online ödeme hariç) bu sürümde aktif. Online ödeme entegrasyonu
+sonraki aşamada eklenecektir.
 
 ## Yerel Çalıştırma
 
@@ -48,19 +49,22 @@ okur; içerik güncellemesi için genellikle sadece bu dosyayı düzenlemeniz ye
 - `/davet` — Davet mektubu
 - `/program` — Bilimsel program (yakında açıklanacak)
 - `/kurullar` — Düzenleme kurulu ve yönetim kurulu
-- `/kayit-konaklama` — Kayıt ve konaklama ücretleri (bilgilendirme; online ödeme sonraki fazda)
+- `/kayit-konaklama` — Kayıt ve konaklama ücretleri (bilgilendirme + kayıt formuna yönlendirme)
+- `/kayit-konaklama/basvuru` — Kayıt formu (herkese açık, hesap gerektirmez)
+- `/kayit-konaklama/basvuru/[id]` — Kayıt özeti ve takip kodu
 - `/bildiri` — Bildiri gönderim koşulları, yazım kuralları, giriş/kayıt bağlantıları
 - `/bildiri/kayit`, `/bildiri/giris` — Yazar hesabı oluşturma / giriş
 - `/bildiri/basvuru` — Yeni bildiri gönderme formu (AUTHOR)
 - `/bildiri/basvurularim` — Yazarın kendi bildirilerini takip ettiği panel (AUTHOR)
 - `/hakem` — Hakem paneli, atanan bildiriler (REVIEWER, çift-kör)
 - `/admin/bildiriler` — Komite/yönetici paneli: tüm bildiriler, hakem atama, nihai karar (ADMIN/COMMITTEE)
+- `/admin/kayitlar` — Komite/yönetici paneli: tüm kongre kayıtları, kategori filtreleri (ADMIN/COMMITTEE)
 - `/iletisim` — İletişim formu, adres, harita
 
 ## Bildiri Sistemi Mimarisi
 
 - **Veritabanı:** PostgreSQL, Prisma ORM (`prisma/schema.prisma`). Modeller: `User`,
-  `Abstract`, `Review`.
+  `Abstract`, `Review`, `Registration`.
 - **Kimlik doğrulama:** E-posta/şifre, bcrypt hash, imzalı JWT httpOnly cookie
   (`lib/auth.js`). Roller: `AUTHOR`, `REVIEWER`, `COMMITTEE`, `ADMIN`.
 - **İş mantığı:** Next.js Server Actions (`lib/actions/*.js`) — form gönderimleri
@@ -87,9 +91,19 @@ Alternatif: Render.com (aynı mantıkla) veya Vercel (frontend) + Supabase/Neon
 (veritabanı) kombinasyonu — bu durumda `start` scriptindeki `prisma db push` adımını
 Vercel'in build/deploy adımına taşımak gerekir.
 
+## Kayıt Sistemi
+
+Kayıt formu (`/kayit-konaklama/basvuru`) hesap gerektirmez; herkes kategori (üye/üye
+olmayan/firma temsilcisi), konaklama seçimi (yok/single/double) ve fatura bilgileriyle
+kayıt oluşturabilir. Ücretler `lib/registration-constants.js` üzerinden
+`lib/site-data.js`'teki tablolardan otomatik hesaplanır (erken kayıt tarihi: 1 Ocak
+2027). Online ödeme adımı henüz yok; kayıt "Kayıt Alındı" durumunda oluşturulur, admin
+paneli (`/admin/kayitlar`) üzerinden tüm kayıtlar görüntülenebilir. Ödeme entegrasyonu
+eklendiğinde `RegistrationStatus` enum'undaki `ODEME_ONAYLANDI` durumu kullanılabilir.
+
 ## Sonraki Aşamalar
 
-- Online kayıt ve ödeme (kredi kartı, e-fatura) sistemi
+- Online ödeme (kredi kartı, e-fatura) entegrasyonu — kayıt formu ve veritabanı hazır
 - Komite paneline hakem/yönetici hesabı oluşturma arayüzü (şu an sadece seed script ile)
 - Bildiri dosyası (opsiyonel PDF) yükleme desteği
 - E-posta bildirimleri (kabul/red/revizyon durum değişikliklerinde otomatik e-posta)
