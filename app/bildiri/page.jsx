@@ -1,5 +1,8 @@
+import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import { abstractRules, site } from "@/lib/site-data";
+import { getSession } from "@/lib/auth";
+import { ROLE_HOME } from "@/lib/guards";
 
 export const metadata = { title: "Bildiri Gönderimi" };
 
@@ -16,7 +19,9 @@ function List({ items }) {
   );
 }
 
-export default function BildiriPage() {
+export default async function BildiriPage() {
+  const session = await getSession();
+
   return (
     <>
       <PageHeader title="Bildiri Gönderimi" breadcrumb="Bildiri Gönderimi" />
@@ -24,16 +29,34 @@ export default function BildiriPage() {
       <section className="mx-auto max-w-content px-5 py-16">
         <div className="card mb-12 flex flex-col items-center gap-4 border-teal-100 bg-teal-50/40 text-center">
           <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-medium text-teal-700">
-            Online bildiri gönderim sistemi yakında aktif olacaktır
+            Online bildiri gönderim sistemi aktif
           </span>
           <p className="max-w-xl text-sm text-gray-600">
-            Hakem değerlendirmeli bildiri gönderim sistemi bir sonraki geliştirme
-            aşamasında bu sayfaya eklenecektir. Aşağıda gönderim koşullarını ve yazım
-            kurallarını inceleyebilirsiniz.
+            Bildiri özetinizi aşağıdaki kurallara uygun şekilde online sistem üzerinden
+            gönderebilir, durumunu takip edebilirsiniz.
           </p>
           <p className="text-sm font-medium text-navy-700">
             Son bildiri gönderim tarihi: {site.importantDates.abstractDeadline}
           </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {session ? (
+              <Link href={ROLE_HOME[session.role] || "/bildiri"} className="btn-primary">
+                Panelime Git →
+              </Link>
+            ) : (
+              <>
+                <Link href="/bildiri/kayit" className="btn-primary">
+                  Hesap Oluştur
+                </Link>
+                <Link
+                  href="/bildiri/giris"
+                  className="inline-flex items-center justify-center rounded-md border border-navy-200 px-6 py-3 text-sm font-medium text-navy-700 transition hover:bg-navy-50"
+                >
+                  Giriş Yap
+                </Link>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-10 lg:grid-cols-2">

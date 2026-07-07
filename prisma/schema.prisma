@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AUTHOR
+  REVIEWER
+  COMMITTEE
+  ADMIN
+}
+
+enum PresentationType {
+  SOZLU
+  POSTER
+}
+
+enum AbstractStatus {
+  GONDERILDI
+  DEGERLENDIRMEDE
+  REVIZYON_ISTENDI
+  KABUL_EDILDI
+  REDDEDILDI
+  PROGRAMLANDI
+}
+
+enum ReviewDecision {
+  KABUL
+  KOSULLU_KABUL
+  RED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  institution  String?
+  role         Role       @default(AUTHOR)
+  createdAt    DateTime   @default(now())
+  submissions  Abstract[] @relation("Submitter")
+  reviews      Review[]
+}
+
+model Abstract {
+  id               String           @id @default(cuid())
+  trackingCode     String           @unique
+  title            String
+  category         String
+  presentationType PresentationType
+  purpose          String
+  method           String
+  findings         String
+  conclusion       String
+  keywords         String
+  authors          Json
+  status           AbstractStatus   @default(GONDERILDI)
+  committeeNote    String?
+  submitterId      String
+  submitter        User             @relation("Submitter", fields: [submitterId], references: [id])
+  reviews          Review[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Review {
+  id           String          @id @default(cuid())
+  abstractId   String
+  abstract     Abstract        @relation(fields: [abstractId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     User            @relation(fields: [reviewerId], references: [id])
+  originality  Int?
+  methodology  Int?
+  contribution Int?
+  presentation Int?
+  comments     String?
+  decision     ReviewDecision?
+  submittedAt  DateTime?
+  createdAt    DateTime        @default(now())
+
+  @@unique([abstractId, reviewerId])
+}
